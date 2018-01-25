@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from algopy import graphmat
 from random import randint, choice
 import time
@@ -36,7 +39,7 @@ def graphDeg(G):
 		int list: odd vertices
 	"""
 	deg = [0] * G.order
-	odd = None
+	odd = []
 
 	for i in range(G.order):
 		deg[i] = G.adj[i][i]
@@ -46,7 +49,7 @@ def graphDeg(G):
 			deg[i] += G.adj[i][j]
 
 		if deg[i] % 2 == 1:
-			odd = i
+			odd.append(i)
 
 	return (deg, odd)
 
@@ -175,7 +178,7 @@ def createEulerianGraph(dst, verticesCount, minEdgeCount):
 		if a != b:
 			G.adj[b][a] += 1
 
-	_, odd = graphDeg(G) #TODO à changer
+	_, odd = graphDeg(G) # TODO à changer
 
 	for i in range(0, len(odd) - 2 * randint(0, 1), 2): # 1 chance sur 2 d'avoir des impairs
 		G.adj[odd[i]][odd[i+1]] += 1
@@ -267,22 +270,18 @@ def eulerTime(G):
 """
 createEulerianGraph("graph_example/eulerian5000.gra", 5000, 5000*500)
 """
-
-
 G = genUnconnectedGraph(12, 3, 10, True, False)[0]
 dot = graphmat.todot(G)
 
 fout = open("graph_example/unconnected.dot", mode='w')
 fout.write(dot)
 fout.close()
-
 """
 G = graphmat.loadgra("graph_example/eulerian" + sys.argv[1] + ".gra")
 G2 = graphmat.loadgra("graph_example/eulerian" + sys.argv[1] + ".gra")
 
 print( testEulerPath(G, G2, []) )
 """
-
 """
 G = graphmat.loadgra("graph_example/eulerian" + sys.argv[1] + ".gra")
 eulerTime(G)
