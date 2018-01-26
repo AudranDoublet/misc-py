@@ -255,7 +255,7 @@ def genUnconnectedGraph(count, minV, maxV, directed, multi = True):
 				__randomFromHead(component, i - 2)
 				a, b = component[i - 1], component[i - 2]
 				G.addedge(a, b)
-				component[i - 1] = component[i - 2]
+				(component[i - 1], component[i - 2]) = (b, a)
 
 			G.addedge(component[i - 1], component[i])
 
@@ -286,7 +286,7 @@ def eulerTime(G):
 """
 createEulerianGraph("graph_example/eulerian5000.gra", 5000, 5000*500)
 """
-G = genUnconnectedGraph(5, 3, 5, True, False)[0]
+G = genUnconnectedGraph(5, 10, 50, False, False)[0]
 dot = graphmat.todot(G)
 
 fout = open("graph_example/unconnected.dot", mode='w')
