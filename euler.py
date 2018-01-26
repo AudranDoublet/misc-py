@@ -213,6 +213,10 @@ def __randomAtHead(c, i):
 	pos = randint(i, len(c) - 1)
 	c[i], c[pos] = c[pos], c[i]
 
+def __randomFromHead(c, i):
+	pos = randint(0, i - 1)
+	c[i], c[pos] = c[pos], c[i]
+
 def genUnconnectedGraph(count, minV, maxV, directed, multi = True):
 	""" Generate a random unconnected graph
 
@@ -230,7 +234,8 @@ def genUnconnectedGraph(count, minV, maxV, directed, multi = True):
 		for _ in range(count if count > 0 else 1):
 			a, b = choice(ga), choice(gb)
 			if G.adj[a][b] == 0 or multi:
-				G.addedge(a, b)
+				if a != b or randint(0, 6) == 0: # moins de boucle sur un noeud
+					G.addedge(a, b)
 
 	components, order = __genConnexComponents(count, minV, maxV)
 	G =  graphmat.GraphMat(order, directed)
@@ -240,14 +245,25 @@ def genUnconnectedGraph(count, minV, maxV, directed, multi = True):
 		le = len(component)
 
 		__randomAtHead(component, 0)
+
 		for i in range(1, le):
 			__randomAtHead(component, i)
+
+			if randint(0, 3) and i > 2:
+				# ajout de sous cycles; étape inutile mais permet d'avoir
+				# des graphes plus variés
+				__randomFromHead(component, i - 2)
+				a, b = component[i - 1], component[i - 2]
+				G.addedge(a, b)
+				component[i - 1] = component[i - 2]
+
 			G.addedge(component[i - 1], component[i])
 
-		G.addedge(component[-1], component[0])
+		if directed or randint(0, 6) == 0:
+			G.addedge(component[-1], component[0]) # cycle, nécessaire que si orienté
 		
 		# ajout d'autres arcs aléatoires
-		addRandomEdges(component, component, le)
+		addRandomEdges(component, component, le >> 1)
 	
 	# ajout d'arcs reliant les différentes composantes fortement connexes
 	if directed:
@@ -270,7 +286,7 @@ def eulerTime(G):
 """
 createEulerianGraph("graph_example/eulerian5000.gra", 5000, 5000*500)
 """
-G = genUnconnectedGraph(12, 3, 10, True, False)[0]
+G = genUnconnectedGraph(5, 3, 5, True, False)[0]
 dot = graphmat.todot(G)
 
 fout = open("graph_example/unconnected.dot", mode='w')
