@@ -209,75 +209,6 @@ def __genConnexComponents(connexComponentCount, minVertices, maxVertices):
 
 	return nodes, total
 
-def __randomAtHead(c, i):
-	pos = randint(i, len(c) - 1)
-	c[i], c[pos] = c[pos], c[i]
-
-def __randomFromHead(c, i):
-	pos = randint(0, i - 1)
-	c[i], c[pos] = c[pos], c[i]
-
-def genUnconnectedGraph(count, minV, maxV, directed, multi = True):
-	""" Generate a random unconnected graph
-
-	Args:
-		count (int): number of connected components
-		minV (int): minimal count of vertices for a connected component
-		maxV (int): maximal count of vertices for a connected component
-		directed (bool): True if the graph is connected, False otherwise
-		multi (bool): True if the graph accept multiple connexion between two nodes
-	Results:
-		GraphMat: the resulting graph
-		int list list: list of connected composents, can be useful for tests
-	"""
-	def addRandomEdges(ga, gb, count):
-		for _ in range(count if count > 0 else 1):
-			a, b = choice(ga), choice(gb)
-			if G.adj[a][b] == 0 or multi:
-				if a != b or randint(0, 6) == 0: # moins de boucle sur un noeud
-					G.addedge(a, b)
-
-	components, order = __genConnexComponents(count, minV, maxV)
-	G =  graphmat.GraphMat(order, directed)
-
-	for component in components:
-		# création d'un cycle aléatoire
-		le = len(component)
-
-		__randomAtHead(component, 0)
-
-		for i in range(1, le):
-			__randomAtHead(component, i)
-
-			if randint(0, 3) and i > 2:
-				# ajout de sous cycles; étape inutile mais permet d'avoir
-				# des graphes plus variés
-				__randomFromHead(component, i - 2)
-				a, b = component[i - 1], component[i - 2]
-				G.addedge(a, b)
-				(component[i - 1], component[i - 2]) = (b, a)
-
-			G.addedge(component[i - 1], component[i])
-
-		if directed or randint(0, 6) == 0:
-			G.addedge(component[-1], component[0]) # cycle, nécessaire que si orienté
-		
-		# ajout d'autres arcs aléatoires
-		addRandomEdges(component, component, le >> 1)
-	
-	# ajout d'arcs reliant les différentes composantes fortement connexes
-	if directed:
-		lists = ([], [])
-		for i in range(len(components)):
-			lists[i % 2].append(i)
-
-		for i in lists[0]:
-			for _ in range(0, randint(0, len(lists[1]) // 2)):
-				c1, c2 = components[i], components[choice(lists[1])]
-				addRandomEdges(c1, c2, min(len(c2), len(c1)) >> 3)	
-
-	return G, components
-
 def eulerTime(G):
 	t = time.time()
 	createEulerPath(G, [])
@@ -286,12 +217,6 @@ def eulerTime(G):
 """
 createEulerianGraph("graph_example/eulerian5000.gra", 5000, 5000*500)
 """
-G = genUnconnectedGraph(5, 10, 50, False, False)[0]
-dot = graphmat.todot(G)
-
-fout = open("graph_example/unconnected.dot", mode='w')
-fout.write(dot)
-fout.close()
 """
 G = graphmat.loadgra("graph_example/eulerian" + sys.argv[1] + ".gra")
 G2 = graphmat.loadgra("graph_example/eulerian" + sys.argv[1] + ".gra")
