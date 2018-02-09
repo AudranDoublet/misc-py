@@ -59,18 +59,22 @@ class GraphMat:
         for j in range(self.order):
             if self.adj[i][j]:
                 if v[j] == None:
-                   v[j] = 1 - v[i]
+                   v[j] = 1 - v[i][0], v[i][1]
+
                    if not self.__isBipartite(j, v):
                          return False
                 elif v[j] == v[i] and i != j:
+                   print(j, i, self.adj[i][j])
                    return False
         return True
 
     def isBipartite(self):
         v = [None] * self.order
+        a = 0
         for i in range(self.order):
             if v[i] == None:
-               v[i] = 0
+               v[i] = 0, a
+               a += 1
                if not self.__isBipartite(i, v):
                   return False
         return True

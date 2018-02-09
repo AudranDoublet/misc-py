@@ -447,7 +447,7 @@ generator.type = GraphType.COMPLETE
 # Generator configuration
 generator = GraphGenerator(20, 5, 10)
 
-generator.directed = False
+generator.directed = True
 generator.colorComponents = 2
 generator.linkComponents = lambda: randint(0, 3) != 0
 generator.uselessEdges = lambda x: (x * x) >> 1
