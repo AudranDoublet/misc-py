@@ -10,7 +10,6 @@ neighbour list.
 
 """
 
-
 class GraphMat:
     """ Simple class for static graph.
 
@@ -30,7 +29,7 @@ class GraphMat:
         self.order = order
         self.directed = directed
         self.adj = [[0 for j in range(order)] for i in range(order)]
-
+        self.degrees = [0] * order
 
     def addedge(self, src, dst):
         """Add egde to graph.
@@ -50,9 +49,41 @@ class GraphMat:
             raise IndexError("Invalid dst index")
         
         self.adj[src][dst] += 1
+        self.degrees[src] += 1
+        self.degrees[dst] += 1
+
         if not self.directed and dst != src:
             self.adj[dst][src] += 1
 
+    def __isBipartite(self, i, v):
+        for j in range(self.order):
+            if self.adj[i][j]:
+                if v[j] == None:
+                   v[j] = 1 - v[i]
+                   if not self.__isBipartite(j, v):
+                         return False
+                elif v[j] == v[i] and i != j:
+                   return False
+        return True
+
+    def isBipartite(self):
+        v = [None] * self.order
+        for i in range(self.order):
+            if v[i] == None:
+               v[i] = 0
+               if not self.__isBipartite(i, v):
+                  return False
+        return True
+
+    def countEdges(self):
+         count = 0
+         for i in range(self.order):
+             for j in range(self.order if self.directed else i + 1):
+                 count += self.adj[i][j]
+         return count
+
+    def oddEdges(self):
+         return [i for i in range(self.order) if self.degrees[i] % 2 == 1]
 
 def todot(ref):
     """Write down dot format of graph.
