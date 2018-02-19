@@ -264,7 +264,6 @@ class GraphType(Enum):
 	TREE = 3 # components will be connex graph with n - 1 edges
 	COMPLETE = 4 # all component's nodes will be linked with at least one edge (except nodes
 		# of same color
-
 class GraphGenerator:
 	""" Simple graph generator
 	Useful methods:
@@ -288,6 +287,7 @@ class GraphGenerator:
 			Default: lambda: False
 		planar: WIP
 		hamiltonian (bool): if the graph should be hamiltonian, True. Otherwise, False.
+		pancyclic (bool): if the graph should be pancyclic, True. Otherwise, False.
 		type (GraphType): the graph type
 		uselessEdges (lambda: int->int): get count of edges that should be added to a
 			connex component of size n
@@ -309,6 +309,7 @@ class GraphGenerator:
 
 		self.planar = False
 		self.hamiltonian = False
+		self.pancyclic = False
 		self.type = GraphType.NORMAL
 
 		self.uselessEdges = lambda x: x >> 1
@@ -389,6 +390,8 @@ class GraphGenerator:
 
 		if self.tree:
 			self.uselessEdges = lambda x: 0
+		if self.pancyclic:
+			self.hamiltonian = True
 		
 		components, order = self.createComponents()
 
@@ -435,7 +438,7 @@ class GraphGenerator:
 					raise Exception('Unable to make Eulerian graph')
 
 		return G, components
-
+		
 """ Example: generate K3,3 graph:
 generator = GraphGenerator(1, 6, 6)
 generator.colorComponents = 2
