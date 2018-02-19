@@ -51,7 +51,7 @@ static inline char next_char(tokenizer *tkz)
 	return *tkz->linepos;
 }
 
-static inline int digit16(char c)
+static inline long digit16(char c)
 {
 	if(isdigit(c))
 		return c - '0';
@@ -63,10 +63,26 @@ static inline int digit16(char c)
 	return -1;
 }
 
-struct tokeninfo *read_int16(tokenizer *tkz)
+static inline long digit10(char c)
 {
-	int digit = digit16(next_char(tkz));
-	int result = 0;
+	if(c >= '0' && c <= '9')
+		return c - '0';
+	return -1;
+}
+
+static inline long digit2(char c)
+{
+	if(c == '0')
+		return 0;
+	else if(c == '1')
+		return 1;
+	else return -1;
+}
+
+FrogObject *read_int16(tokenizer *tkz)
+{
+	long digit = digit16(next_char(tkz));
+	long result = 0;
 
 	for(; digit != -1; digit = digit16(next_char(tkz)))
 	{
@@ -74,17 +90,43 @@ struct tokeninfo *read_int16(tokenizer *tkz)
 		tkz->linepos++;
 	}
 
-	return NULL; //FIXME
+	return FromNativeInteger(result);
 }
 
-struct tokeninfo *read_int2(tokenizer *tkz)
+long read_int2(tokenizer *tkz)
 {
+	long digit = digit2(next_char(tkz));
+	long result = 0;
 
+	for(; digit != -1; digit = digit2(next_char(tkz)))
+	{
+		result = (result << 1) | digit;
+		tkz->linepos++;
+	}
+
+	return FromNativeInteger(result);
 }
 
-struct tokeninfo *read_int10(tokenizer *tkz)
+long read_int10s(tokenizer *tkz)
 {
-	//TODO if .eE => float
+	long digit = digit2(next_char(tkz));
+	long result = 0;
+
+	for(; digit != -1; digit = digit10(next_char(tkz)))
+	{
+		result = (result * 10) + digit;
+		tkz->linepos++;
+	}
+
+	return result;
+}
+
+FrogObject *read_int10(tokenizer *tkz)
+{
+	long base = read_int10s(tkz);
+	//char nxt = next_char(tkz);
+	//FIXME float
+	return FromNativeInteger(base);
 }
 
 struct tokeninfo *read_number(tokenizer *tkz)

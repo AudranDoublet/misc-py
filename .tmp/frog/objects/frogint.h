@@ -7,4 +7,5 @@ typedef struct {
 	long value;
 } FrogInt;
 
+FrogObject *FromNativeInteger(long v);
 #endif
