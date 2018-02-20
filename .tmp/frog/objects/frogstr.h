@@ -10,8 +10,8 @@ typedef struct
 	unsigned int *str;
 } FrogString;
 
-FrogString utf8toStr(char *utf8, char end, int escape);
+FrogObject *utf8tostr(char *utf8);
 
-FrogString 
+FrogObject *utf32tostr(fchar *str);
 
 #endif

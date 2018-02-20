@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include "strutils.h"
+#include "../frog.h"
 
 #define SIZE_NODE_STRBUILDER 	64
 
@@ -9,7 +9,7 @@
  */
 struct buildernode
 {
-	char string[SIZE_NODE_STRBUILDER];
+	fchar string[SIZE_NODE_STRBUILDER];
 	size_t length;
 
 	struct buildernode *next;
@@ -83,7 +83,7 @@ void clear_strbuilder(struct strbuilder *builder)
 	clear_node(first);
 }
 
-void add_strbuilder(struct strbuilder *builder, char c)
+void add_strbuilder(struct strbuilder *builder, fchar c)
 {
 	struct buildernode *curr = builder->last;
 
@@ -97,7 +97,7 @@ void add_strbuilder(struct strbuilder *builder, char c)
 	builder->length++;
 }
 
-void append_strbuilder(struct strbuilder *builder, char *str)
+void append_strbuilder(struct strbuilder *builder, fchar *str)
 {
 	for( ; *str ; str++ )
 	{
@@ -105,25 +105,29 @@ void append_strbuilder(struct strbuilder *builder, char *str)
 	}
 }
 
-char *tostr_strbuilder(struct strbuilder *builder)
+fchar *tostr_strbuilder(struct strbuilder *builder)
 {
 	// allocate the memory which will be used to store the
-	// result: length + 1 (for the final character \0
-	char *str = malloc(sizeof(char) * (builder->length + 1));
-	char *cur = str;
+	// result: length + 1 (for the final fcharacter \0
+	fchar *str = malloc(sizeof(fchar) * (builder->length + 1));
+	fchar *cur = str;
 	struct buildernode *curr = builder->first;
 
 	for( ; curr ; cur += curr->length, curr = curr->next )
 	{
-		memcpy(cur, curr->string, curr->length);
+		memcpy(cur, curr->string, curr->length * sizeof(fchar));
 	}
 
-	str[builder->length] = '\0';
+	str[builder->length] = L'\0';
+
 	return str;
 }
 
 void free_strbuilder(struct strbuilder *builder)
 {
+	if(!builder)
+		return;
+
 	free_node(builder->first);
 	free_node(builder->reserve);
 

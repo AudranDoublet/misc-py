@@ -2,7 +2,7 @@
 
 FrogType int_type;
 
-FrogInt *FrogNativeInteger(long i)
+FrogObject *FromNativeInteger(long i)
 {
 	FrogInt *result = malloc(sizeof(FrogInt));
 
@@ -16,13 +16,12 @@ FrogInt *FrogNativeInteger(long i)
 	result->ob_base.type = &int_type;
 	result->ob_base.refcnt = 0;
 
-	return result;
+	return (FrogObject *) result;
 }
 
 FrogObject *int_to_str(FrogObject *obj)
 {
-	//FrogInt *asint = obj;
-	return NULL;
+	return obj; //FIXME
 }
 
 FrogObject *int_to_int(FrogObject *obj)
@@ -41,7 +40,7 @@ int int_compare(FrogObject *a, FrogObject *b)
 
 	if( !ObType(b)->toint)
 	{
-		FrogErr_Compare(a, b);
+		FrogErr_Operator(a, b, "Comparaison");
 		return -2;
 	}
 	else
@@ -83,7 +82,7 @@ FrogObject *int_sub(FrogObject *a, FrogObject *b)
 	return FromNativeInteger(FIValue(a) - FIValue(b));
 }
 
-FrogObject *int_sub(FrogObject *a, FrogObject *b)
+FrogObject *int_mul(FrogObject *a, FrogObject *b)
 {
 	if(ObType(b)->toint)
 	{
@@ -91,23 +90,8 @@ FrogObject *int_sub(FrogObject *a, FrogObject *b)
 	}
 	else
 	{
-		FrogErr_Operator(a, b, "-");
-		return NULL;
-	}
-
-	return FromNativeInteger(FIValue(a) - FIValue(b));
-}
-
-FrogObject *int_mul(FrogObject *a, FrogObject *b)
-{
-	if(obtype(b)->toint)
-	{
-		b = (*ObType(b)->toint)(b);
-	}
-	else
-	{
 		FrogErr_Operator(a, b, "*");
-		return null;
+		return NULL;
 	}
 
 	//fixme 
@@ -117,7 +101,7 @@ FrogObject *int_mul(FrogObject *a, FrogObject *b)
 
 FrogObject *int_div(FrogObject *a, FrogObject *b)
 {
-	return a; //FIXME return a floating number :D
+	return b ? b : a; //FIXME return a floating number :D
 }
 
 FrogObject *int_divfloor(FrogObject *a, FrogObject *b)
@@ -188,19 +172,19 @@ FrogObject *int_pow(FrogObject *a, FrogObject *b)
 	return FromNativeInteger(res);
 }
 
-static inline long abs(long v)
+static inline long int_abs(long v)
 {
 	return v < 0 ? -v : v;
 }
 
 FrogObject *int_neg(FrogObject *a)
 {
-	return FromNativeInteger(-abs(FIValue(a)));
+	return FromNativeInteger(-int_abs(FIValue(a)));
 }
 
-frogobject *int_pos(frogobject *a)
+FrogObject *int_pos(FrogObject *a)
 {
-	return fromnativeinteger(abs(fivalue(a)));
+	return FromNativeInteger(int_abs(FIValue(a)));
 }
 
 FrogObject *int_inv(FrogObject *a)
@@ -208,24 +192,89 @@ FrogObject *int_inv(FrogObject *a)
 	return FromNativeInteger(~FIValue(a));
 }
 
-frogobject *int_lshift(frogobject *a, frogobject *b)
+FrogObject *int_lshift(FrogObject *a, FrogObject *b)
 {
-	if(obtype(b)->toint)
+	if(ObType(b)->toint)
 	{
-		b = (*obtype(b)->toint)(b);
+		b = (*ObType(b)->toint)(b);
 	}
 	else
 	{
-		frogerr_operator(a, b, "<<");
-		return null;
+		FrogErr_Operator(a, b, "<<");
+		return NULL;
 	}
 
 	if(FIValue(b) < 0)
 	{
-		frogerr
+		FrogErr_Value("negative shift count");
 	}
 
-	return fromnativeinteger(fivalue(a) * fivalue(b));
+	return FromNativeInteger(FIValue(a) << FIValue(b));
+}
+
+FrogObject *int_rshift(FrogObject *a, FrogObject *b)
+{
+	if(ObType(b)->toint)
+	{
+		b = (*ObType(b)->toint)(b);
+	}
+	else
+	{
+		FrogErr_Operator(a, b, ">>");
+		return NULL;
+	}
+
+	if(FIValue(b) < 0)
+	{
+		FrogErr_Value("negative shift count");
+	}
+
+	return FromNativeInteger(FIValue(a) >> FIValue(b));
+}
+
+FrogObject *int_and(FrogObject *a, FrogObject *b)
+{
+	if(ObType(b)->toint)
+	{
+		b = (*ObType(b)->toint)(b);
+	}
+	else
+	{
+		FrogErr_Operator(a, b, "&");
+		return NULL;
+	}
+
+	return FromNativeInteger(FIValue(a) & FIValue(b));
+}
+
+FrogObject *int_or(FrogObject *a, FrogObject *b)
+{
+	if(ObType(b)->toint)
+	{
+		b = (*ObType(b)->toint)(b);
+	}
+	else
+	{
+		FrogErr_Operator(a, b, "|");
+		return NULL;
+	}
+
+	return FromNativeInteger(FIValue(a) | FIValue(b));
+}
+
+FrogObject *int_xor(FrogObject *a, FrogObject *b)
+{
+	if(ObType(b)->toint)
+	{
+		b = (*ObType(b)->toint)(b);
+	}
+	else
+	{
+		FrogErr_Operator(a, b, "^");
+		return NULL;
+	}
+
+	return FromNativeInteger(FIValue(a) ^ FIValue(b));
 }
 
 FrogAsNumber int_as_number = {
@@ -239,14 +288,34 @@ FrogAsNumber int_as_number = {
 	int_neg,
 	int_pos,
 	int_pos,
-
-
+	int_inv,
+	int_lshift,
+	int_rshift,
+	int_and,
+	int_or,
+	int_xor,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL
 };
 
 FrogType int_type = {
 	{
-		NULL,		// FIXME type
-		-1		// refcnt
+		-1,		// FIXME type
+		NULL		// refcnt
 	}, 
 	"int",			// type name
 	NULL,			// FIXME getter

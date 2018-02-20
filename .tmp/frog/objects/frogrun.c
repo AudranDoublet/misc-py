@@ -1,3 +1,5 @@
+#include "../frog.h"
+
 FrogObject *FrogCall_Add(FrogObject *a, FrogObject *b)
 {
 	FrogType *type = ObType(a);
@@ -8,6 +10,7 @@ FrogObject *FrogCall_Add(FrogObject *a, FrogObject *b)
 	}
 }
 
+/*
 FrogObject *FrogCall_Sub(FrogObject *a, FrogObject *b);
 
 FrogObject *FrogCall_Mul(FrogObject *a, FrogObject *b);
@@ -76,4 +79,4 @@ FrogObject *FrogCall_SeqGet(FrogObject *a, FrogObject *b);
 
 FrogObject *FrogCall_SeqSet(FrogObject *a, FrogObject *b, FrogObject *c);
 
-FrogObject *FrogCall_Call(FrogObject *a, FrogObject *b, FrogObject *c);
+FrogObject *FrogCall_Call(FrogObject *a, FrogObject *b, FrogObject *c);**/

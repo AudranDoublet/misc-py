@@ -28,17 +28,17 @@ void clear_strbuilder(struct strbuilder *builder);
 /**
  * add the given string to the builder
  */
-void append_strbuilder(struct strbuilder *builder, char *str);
+void append_strbuilder(struct strbuilder *builder, fchar *str);
 
 /**
  * add the given character to the builder
  */
-void add_strbuilder(struct strbuilder *builder, char chr);
+void add_strbuilder(struct strbuilder *builder, fchar chr);
 
 /**
  * get the current value in a unique string
  */
-char *tostr_strbuilder(struct strbuilder *builder);
+fchar *tostr_strbuilder(struct strbuilder *builder);
 
 /**
  * free the given builder

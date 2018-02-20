@@ -31,7 +31,7 @@ typedef struct {
 	unaryfunction  neg;
 	unaryfunction  pos;
 	unaryfunction  abs;
-	binaryfunction inv;
+	unaryfunction inv;
 	binaryfunction lshift;
 	binaryfunction rshift;
 	binaryfunction and;

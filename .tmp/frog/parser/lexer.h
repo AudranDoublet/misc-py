@@ -1,17 +1,16 @@
-#ifndef __LEXER_FROG_H__
-#define __LEXER_FROG_H__
-#include "lexer.h"
+#ifndef __PARSER_H__
+#define __PARSER_H__
+
+#define TOKEN_ERROR		-1
+#define TOKEN_EOF		0x00
 
 // Values
-#define TOKEN_INTDEC	0x01 // 10
-#define TOKEN_INTHEX	0x02 // 0x1a
-#define TOKEN_INTBIN	0x03 // 0b00011010
-#define TOKEN_DECIMAL	0x04 // 0.10 0.10e10
-#define TOKEN_STRING	0x05 // "example" 'example'
-#define TOKEN_ASTRING	0x06 // @'example' @"example\:p"
-#define TOKEN_TRUE	0x06 // True
-#define TOKEN_FALSE	0x07 // False
-#define TOKEN_NULL	0x08 // None
+#define TOKEN_INTEGER	0x01 // 10 0xaa
+#define TOKEN_DECIMAL	0x02 // 0.10 0.10e10
+#define TOKEN_STRING	0x03 // "example" 'example' @"example\:p"
+#define TOKEN_TRUE	0x04 // True
+#define TOKEN_FALSE	0x05 // False
+#define TOKEN_NULL	0x06 // None
 
 // Branchement instructions
 #define TOKEN_IF	0x10 // if
@@ -70,5 +69,57 @@
 #define TOKEN_BWOXOR	0x74 // ^
 #define TOKEN_BWONOT	0x75 // ~
 
-struct automatanode *create_frogautomata();
+typedef struct tokenizer tokenizer;
+typedef fchar *(*nextline)(tokenizer *ptr);
+
+typedef struct
+{
+	int type;
+	FrogObject *value;
+} tokeninfo;
+
+struct automatanode
+{
+	struct automatanode *nexts[128];
+	int tokentype;
+};
+
+struct tokenizer
+{
+	fchar *line;
+	fchar *linepos;
+
+	void *file;
+	nextline linegetter;
+
+	struct automatanode *head;
+	tokeninfo *current;
+	tokeninfo *next;
+};
+
+/**
+ * Create a new tokenizer
+ */
+tokenizer *create_tokenizer(nextline linegetter, void *file);
+
+/**
+ * Change value of tokenizer->current (return the newvalue) and set tokenizer->next to NULL.
+ */
+tokeninfo *next_token(tokenizer *tkz);
+
+/**
+ * Change value of tokenizer->next and return the new value
+ */
+tokeninfo *peek_token(tokenizer *tkz);
+
+/**
+ * Verify that the result of next_token is of the right
+ * token type.
+ */
+int eat_token(tokenizer *tkz, int type);
+
+/**
+ * Free the given parser
+ */
+void free_tokenizer(tokenizer *tkz);
 #endif

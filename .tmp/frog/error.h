@@ -1,9 +1,15 @@
 #ifndef __FROGERROR_H__
 #define __FROGERROR_H__
 
-void FrogErr_Post(char *name, char *message);
+typedef struct {
+	FrogObjHead
+	FrogObject *name;
+	FrogObject *message;
+} FrogError;
 
-void FrogErr_Compare(FrogObject *a, FrogObject *b);
+FrogObject *FrogErr_Get(void);
+
+void FrogErr_Post(char *name, char *message);
 
 void FrogErr_Operator(FrogObject *a, FrogObject *b, char *op);
 

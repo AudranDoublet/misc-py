@@ -3,11 +3,11 @@
 # Compilers vars
 CC=gcc
 CPPFLAGS= -MMD
-CFLAGS= -g -Wall -Wextra -std=c99
+CFLAGS= -g -Wall -Wextra -std=c99 -lreadline
 LDFLAGS=
 LDLIBS=
  
-SRC= parser/lexer.c parser/lexerfrog.c common/strutils.c
+SRC= objects/frogint.c objects/frogrun.c objects/frogstr.c parser/lexer.c common/strutils.c error.c main.c
 OBJ= ${SRC:.c=.o}
 DEP= ${SRC:.c=.d}
  
