@@ -1,5 +1,10 @@
 #ifndef __STRUTILS_H__
 #define __STRUTILS_H__
+
+#define BASEN "0123456789abcdef" // base 2 to 16
+#define BASE32 "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567" // base 32
+#define BASE64 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/" // base 64
+
 /**
  * represent a string builder
  * to see how you can use it, see above functions
@@ -34,6 +39,12 @@ void append_strbuilder(struct strbuilder *builder, fchar *str);
  * add the given character to the builder
  */
 void add_strbuilder(struct strbuilder *builder, fchar chr);
+
+/**
+ * add the given integer in base 'base' to the builder
+ * return 0 if the function fail, 1 otherwise
+ */
+int addint_strbuilder(struct strbuilder *builder, long value, int base);
 
 /**
  * get the current value in a unique string

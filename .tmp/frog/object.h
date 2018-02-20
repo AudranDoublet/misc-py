@@ -16,6 +16,7 @@ typedef size_t (*sizefunction)(FrogObject *);
 typedef int (*intfunction)(FrogObject *);
 typedef int (*biintfunction)(FrogObject *, FrogObject *);
 typedef long (*longfunction)(FrogObject *);
+typedef void (*printfunction)(FrogObject *, FILE *);
 
 typedef FrogObject *(*getattrbfunction)(FrogObject *, char *);
 typedef FrogObject *(*setattrbfunction)(FrogObject *, char *, FrogObject *);
@@ -87,6 +88,7 @@ struct FrogType {
 	longfunction hash;
 	sizefunction size;
 
+	printfunction print;
 	unaryfunction tostr;
 	unaryfunction toint;
 

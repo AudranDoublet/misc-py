@@ -1,15 +1,16 @@
 #include <stdio.h>
 #include "frog.h"
-
-static char line_buffer[1024];
+#include <readline/readline.h>
+#include <readline/history.h>
 
 fchar *nextline1(tokenizer *tkz)
 {
-	printf(">>> ");
-	line_buffer[0] = '\0';
-	fscanf(tkz->file, "%1023[^\n]", line_buffer);
+	UNUSED(tkz);
 
-	FrogString *str = (FrogString *) utf8tostr(line_buffer);
+	char *line;
+	line = readline(">>> ");
+
+	FrogString *str = (FrogString *) utf8tostr(line);
 
 	if(str == NULL)
 	{

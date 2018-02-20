@@ -3,7 +3,10 @@
 #ifndef __FROG_H__
 #define __FROG_H__
 
+#define UNUSED(x) (void)(x)
+
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
 
 typedef uint32_t fchar; /** UTF-32 character **/

@@ -11,6 +11,11 @@
 	else			\
 		c2 |= (c1 & UTF8_MASKN) << n;
 
+#define FrogSValue(s) (((FrogString *) s)->str)
+#define FrogSLength(s) (((FrogString *)s)->length)
+
+FrogType str_type;
+
 FrogObject *utf8tostr(char *str)
 {
 	struct strbuilder *builder = NULL;
@@ -102,3 +107,42 @@ FrogObject *utf32tostr(fchar *str)
 
 	return (FrogObject *) res;
 }
+
+long str_hash(FrogObject *obj)
+{
+	return obj ? 0 : 0; //FIXME
+}
+
+int str_compare(FrogObject *a, FrogObject *b)
+{
+	return a ? 0 : b ? 0 : 0; //FIXME
+}
+
+void str_print(FrogObject *str, FILE *file)
+{
+	fprintf(file, "%ls", FrogSValue(str));
+}
+
+FrogObject *str_to_str(FrogObject *obj)
+{
+	return obj;
+}
+
+FrogType str_type = {
+	{
+		-1,		// FIXME type
+		NULL		// refcnt
+	}, 
+	"int",			// type name
+	NULL,			// FIXME getter
+	NULL,			// setter
+	str_hash,		// hash
+	NULL,			// size
+	str_print,		// print
+	str_to_str,		// tostr
+	NULL,			// toint
+	str_compare,		// compare
+	NULL,			// as number
+	NULL,			// as sequence
+	NULL,			// call	
+};

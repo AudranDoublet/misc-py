@@ -21,7 +21,23 @@ FrogObject *FromNativeInteger(long i)
 
 FrogObject *int_to_str(FrogObject *obj)
 {
-	return obj; //FIXME
+	struct strbuilder *builder = create_strbuilder();
+	long value = FIValue(obj);
+
+	if(!builder || !addint_strbuilder(builder, value, 10))
+		goto error;
+
+	fchar *res = tostr_strbuilder(builder);
+
+	if(!res)
+		goto error;
+
+	free_strbuilder(builder);
+	return utf32tostr(res);
+error:
+	FrogErr_Memory();
+	free_strbuilder(builder);
+	return NULL;
 }
 
 FrogObject *int_to_int(FrogObject *obj)
@@ -154,7 +170,38 @@ FrogObject *int_pow(FrogObject *a, FrogObject *b)
 	}
 	else
 	{
-		FrogErr_Operator(a, b, "**");
+		FrogErr_Op;
+		if(exp % 2 == 1)
+			res *= va;
+		exp >>= 1;
+	}
+
+	return FromNativeInteger(res);
+}
+
+static inline long int_abs(long v)
+{
+	return v < 0 ? -v : v;
+}
+
+FrogObject *int_neg(FrogObject *a)
+{
+	return FromNativeInteger(-int_abs(FIValue(a)));
+}
+
+FrogObject *int_pos(FrogObject *a)
+{
+	return FromNativeInteger(int_abs(FIValue(a)));
+}
+
+FrogObject *int_inv(FrogObject *a)
+{
+	return FromNativeInteger(~FIValue(a));
+}
+
+FrogObject *int_lshift(FrogObject *a, FrogObject *b)
+{
+	if(ObType(b)->toinerator(a, b, "**");
 		return NULL;
 	}
 
@@ -322,6 +369,7 @@ FrogType int_type = {
 	NULL,			// setter
 	int_hash,		// hash
 	NULL,			// size
+	NULL,			// print
 	int_to_str,		// tostr
 	int_to_int,		// toint
 	int_compare,		// compare

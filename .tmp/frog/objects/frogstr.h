@@ -13,5 +13,4 @@ typedef struct
 FrogObject *utf8tostr(char *utf8);
 
 FrogObject *utf32tostr(fchar *str);
-
 #endif

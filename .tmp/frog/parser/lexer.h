@@ -11,6 +11,7 @@
 #define TOKEN_TRUE	0x04 // True
 #define TOKEN_FALSE	0x05 // False
 #define TOKEN_NULL	0x06 // None
+#define TOKEN_ID	0x07 // Identifier
 
 // Branchement instructions
 #define TOKEN_IF	0x10 // if

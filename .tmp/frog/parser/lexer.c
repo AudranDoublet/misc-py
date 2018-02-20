@@ -269,6 +269,7 @@ tokeninfo *read_keyword(tokenizer *tkz)
 	FrogObject *res;
 	struct strbuilder *builder = NULL;
 	fchar c;
+	fchar *str;
 
 	head = tkz->head;
 	alphanum = 1;
@@ -299,7 +300,6 @@ tokeninfo *read_keyword(tokenizer *tkz)
 	{
 		if(!alphanum)
 		{
-			free_strbuilder(builder);
 			goto error;
 		}
 		else
@@ -314,10 +314,16 @@ tokeninfo *read_keyword(tokenizer *tkz)
 				add_strbuilder(builder, c);
 			}
 
-			res = utf32tostr(tostr_strbuilder(builder));
+			str = tostr_strbuilder(builder);
+			res = utf32tostr(str);
 
 			if(res == NULL)
-				tokentype = TOKEN_ERROR;
+			{
+				free(str);
+				goto error;
+			}
+
+			tokentype = TOKEN_ID;
 		}
 	}
 

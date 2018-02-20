@@ -105,6 +105,48 @@ void append_strbuilder(struct strbuilder *builder, fchar *str)
 	}
 }
 
+int addint_strbuilder(struct strbuilder *builder, long value, int base)
+{
+	char *digits;
+	fchar buffer[64]; // maximal size to express a long as int
+	size_t i = 0;
+
+	if(base >= 2 && base <= 16)
+	{
+		digits = BASEN;
+	}
+	else if(base == 32)
+	{
+		digits = BASE32;
+	}
+	else if(base == 64)
+	{
+		digits = BASE64;
+	}
+	else
+	{
+		goto error;
+	}
+
+	if(value < 0)
+	{
+		value = -value;
+		add_strbuilder(builder, '-');
+	}
+
+	do
+	{
+		buffer[i++] = digits[value % base];
+		value /= base;
+	} while(value > 0);
+
+
+	for(; i > 0; i--)
+		add_strbuilder(builder, buffer[i - 1]);
+error:
+	return 0;
+}
+
 fchar *tostr_strbuilder(struct strbuilder *builder)
 {
 	// allocate the memory which will be used to store the
