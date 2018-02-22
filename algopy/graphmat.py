@@ -111,9 +111,11 @@ def todot(ref):
     s += '}'
     return s
 
-
-
-
+def savedot(ref, filename):
+    r = todot(ref)
+    f = open(filename, mode='w')
+    f.write(r)
+    f.close()
 
 # load / save gra format    
 
