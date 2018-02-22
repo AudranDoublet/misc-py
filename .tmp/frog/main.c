@@ -11,10 +11,11 @@ fchar *nextline1(tokenizer *tkz)
 	line = readline(">>> ");
 
 	FrogString *str = (FrogString *) utf8tostr(line);
+	free(line);
 
 	if(str == NULL)
 	{
-		return NULL; //FIXME
+		return NULL;
 	}
 
 	if(str->length == 0)
@@ -33,19 +34,6 @@ fchar *nextline1(tokenizer *tkz)
 
 int main(void)
 {
-	tokenizer *tkz = create_tokenizer(nextline1, NULL);
-	tkz->file = stdin;
-	tokeninfo *tkn;
-
-	while((tkn = next_token(tkz)) && tkn->type >= 1)
-	{
-		if(tkn->value)
-		{
-			printf("%i (%li)\n", tkn->type, ((FrogInt *) tkn->value)->value);
-		}
-		else
-			printf("%i\n", tkn->type);
-	}
-
+	parse_terminal();
 	return 0;
 }

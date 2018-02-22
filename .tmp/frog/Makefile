@@ -2,12 +2,12 @@
  
 # Compilers vars
 CC=gcc
-CPPFLAGS= -MMD
-CFLAGS= -g -Wall -Wextra -std=c99 -lreadline
+CPPFLAGS= -MMD #-fsanitize=address
+CFLAGS= -g -Wall -Wextra -std=c99
 LDFLAGS=
-LDLIBS=
+LDLIBS=-lreadline
  
-SRC= objects/frogint.c objects/frogrun.c objects/frogstr.c parser/lexer.c common/strutils.c error.c main.c
+SRC= objects/*.c parser/*.c common/strutils.c common/hashmap.c error.c main.c
 OBJ= ${SRC:.c=.o}
 DEP= ${SRC:.c=.d}
  
@@ -16,7 +16,7 @@ all: test
 -include ${DEP}
  
 test:
-	${CC} ${CPPFLAGS} ${CFLAGS} ${SRC} -o test
+	${CC} ${CPPFLAGS} ${CFLAGS} ${SRC} -o test ${LDLIBS}
  
 clean:
 	rm -f ${DEP} ${OBJ} test test.d

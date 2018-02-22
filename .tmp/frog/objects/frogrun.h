@@ -2,11 +2,44 @@ typedef struct {
 	FrogObjHead
 	FrogObject *a, *b, *c;
 	void *func;
+	int assignation; // boolean: assignation ?
 } FrogObjectCaller;
+
+FrogObject *CreateCaller(int assignation, void *func, FrogObject *a, FrogObject *b, FrogObject *c);
+
+void Frog_Free(FrogObject *v);
+
+FrogObject *Frog_ToString(FrogObject *a);
+
+int Frog_Print(FrogObject *a, FILE *out);
+
+long Frog_Hash(FrogObject *a);
+
+FrogObject *FrogCall_AsBool(FrogObject *o);
+
+FrogObject *FrogCall_Not(FrogObject *o);
+
+FrogObject *FrogCall_Exec(FrogObject *env, FrogObject *a);
+
+FrogObject *FrogCall_EQ(FrogObject *a, FrogObject *b);
+
+FrogObject *FrogCall_NE(FrogObject *a, FrogObject *b);
+
+FrogObject *FrogCall_LO(FrogObject *a, FrogObject *b);
+
+FrogObject *FrogCall_GT(FrogObject *a, FrogObject *b);
+
+FrogObject *FrogCall_LE(FrogObject *a, FrogObject *b);
+
+FrogObject *FrogCall_GE(FrogObject *a, FrogObject *b);
 
 FrogObject *FrogCall_Add(FrogObject *a, FrogObject *b);
 
 FrogObject *FrogCall_Sub(FrogObject *a, FrogObject *b);
+
+FrogObject *FrogCall_Pos(FrogObject *a);
+
+FrogObject *FrogCall_Neg(FrogObject *a);
 
 FrogObject *FrogCall_Mul(FrogObject *a, FrogObject *b);
 
@@ -18,13 +51,7 @@ FrogObject *FrogCall_Mod(FrogObject *a, FrogObject *b);
 
 FrogObject *FrogCall_Pow(FrogObject *a, FrogObject *b);
 
-FrogObject *FrogCall_Neg(FrogObject *a, FrogObject *b);
-
-FrogObject *FrogCall_Pos(FrogObject *a, FrogObject *b);
-
-FrogObject *FrogCall_Abs(FrogObject *a, FrogObject *b);
-
-FrogObject *FrogCall_Inv(FrogObject *a, FrogObject *b);
+FrogObject *FrogCall_Inv(FrogObject *a);
 
 FrogObject *FrogCall_LShift(FrogObject *a, FrogObject *b);
 
@@ -68,7 +95,9 @@ FrogObject *FrogCall_IOr(FrogObject *a, FrogObject *b);
 
 FrogObject *FrogCall_IXor(FrogObject *a, FrogObject *b);
 
-FrogObject *FrogCall_Assign(FrogObject *a, FrogObject *b);
+FrogObject *FrogCall_Get(FrogObject *a, FrogObject *b);
+
+FrogObject *FrogCall_Set(FrogObject *a, FrogObject *b, FrogObject *c);
 
 FrogObject *FrogCall_SeqGet(FrogObject *a, FrogObject *b);
 

@@ -1,1 +1,0 @@
-FrogObject *parse(tokenizer *tkz);

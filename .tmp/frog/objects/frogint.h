@@ -8,4 +8,6 @@ typedef struct {
 } FrogInt;
 
 FrogObject *FromNativeInteger(long v);
+
+int FrogIsInt(FrogObject *o);
 #endif

@@ -2,19 +2,27 @@
 #define __HASH_MAP_H__
 struct entry_s
 {
+	FrogObject *key, *value;
 	long hash;
-	char *key;
-	void *value;
 	struct entry_s *next;
 };
 
-struct hashmap
+typedef struct
 {
 	size_t size;
 	size_t capacity;
-	struct entry_s *entries;	
-};
+	struct entry_s **entries;	
+} hashmap;
 
+hashmap *create_hashmap();
 
-struct hashmap *create_hashmap();
+int put_hashmap(hashmap *map, FrogObject *key, FrogObject *value);
+
+FrogObject *get_hashmap(hashmap *map, FrogObject *key);
+
+FrogObject *remove_hashmap(hashmap *map, FrogObject *key);
+
+void clear_hashmap(hashmap *map);
+
+void free_hashmap(hashmap *map);
 #endif

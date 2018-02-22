@@ -6,6 +6,9 @@ typedef struct FrogSObject FrogSObject;
 
 typedef struct FrogType FrogType;
 
+#define Ref(o) if(o) ObRefcnt(o)++
+#define Unref(o) if(o) ObRefcnt(o)--
+
 #define FrogObjHead FrogObject ob_base;
 #define FrogSObjHead FrogSObject ob_base;
 
@@ -17,9 +20,7 @@ typedef int (*intfunction)(FrogObject *);
 typedef int (*biintfunction)(FrogObject *, FrogObject *);
 typedef long (*longfunction)(FrogObject *);
 typedef void (*printfunction)(FrogObject *, FILE *);
-
-typedef FrogObject *(*getattrbfunction)(FrogObject *, char *);
-typedef FrogObject *(*setattrbfunction)(FrogObject *, char *, FrogObject *);
+typedef void (*objfunction)(FrogObject *);
 
 typedef struct {
 	binaryfunction add;
@@ -46,10 +47,6 @@ typedef struct {
 	binaryfunction inplace_divfloor;
 	binaryfunction inplace_mod;
 	binaryfunction inplace_pow;
-	unaryfunction  inplace_neg;
-	unaryfunction  inplace_pos;
-	unaryfunction  inplace_abs;
-	binaryfunction inplace_inv;
 	binaryfunction inplace_lshift;
 	binaryfunction inplace_rshift;
 	binaryfunction inplace_and;
@@ -58,9 +55,8 @@ typedef struct {
 } FrogAsNumber;
 
 typedef struct {
-	sizefunction   size;
-	binaryfunction set;
-	unaryfunction  get;
+	ternaryfunction set;
+	binaryfunction  get;
 } FrogAsSequence;
 
 struct FrogObject {
@@ -82,8 +78,8 @@ struct FrogType {
 	FrogObjHead
 	char *name;
 
-	getattrbfunction getter;
-	setattrbfunction setter;
+	binaryfunction getter;
+	ternaryfunction setter;
 
 	longfunction hash;
 	sizefunction size;
@@ -91,13 +87,16 @@ struct FrogType {
 	printfunction print;
 	unaryfunction tostr;
 	unaryfunction toint;
+	binaryfunction exec;
 
-	biintfunction compare;
+	biintfunction simple_compare;
+	biintfunction complex_compare;
 
 	FrogAsNumber *as_number;
 	FrogAsSequence *as_sequence;
 
-	ternaryfunction *call;
+	ternaryfunction call;
+	objfunction free;
 };
 
 FrogObject *ob_tostr(FrogObject *ob);

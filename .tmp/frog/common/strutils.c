@@ -143,6 +143,8 @@ int addint_strbuilder(struct strbuilder *builder, long value, int base)
 
 	for(; i > 0; i--)
 		add_strbuilder(builder, buffer[i - 1]);
+
+	return 1;
 error:
 	return 0;
 }
