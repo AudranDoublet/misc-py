@@ -1,5 +1,6 @@
 from algopy import graph, graphmat
 import os
+import oldstrongly
 
 def strongly_connected(G):
 	p = ToutPiti(G)
@@ -23,13 +24,25 @@ def __graphlist(dirpath):
     L = sorted(L)
     return [graph.loadgra(f) for f in L]    
 
-def run_verif_strongly(f, dirpath):
+def run_verif_strongly(f, f2, dirpath):
 	tests = __graphlist(dirpath)
+	tests2 = __graphlist(dirpath)
+	i = 0
 
 	for G in tests:
+		G2 = tests2[i]
+		i += 1
+
 		count = f(G)
+		count2 = f2(G2)
+
 		r = strongly_connected(G)
-		s = "[{}] {:3d} => {:3d}".format("OK" if r else "KO", G.order, count)
+		r2 = strongly_connected(G2)
+
+		ok = "[{}|{}]".format("OK" if r else "KO", "OK" if r2 else "KO")
+		res = "<" if count < count2 else (">" if count > count2 else "=")
+
+		s = "{} {} {:3d} => {:3d} | {:3d}".format(res, ok, G.order, count, count2)
 		print(s)
 
 class ToutPiti:
@@ -192,4 +205,5 @@ def makeMeStronglyConnected(G):
 
 	return tot
 
-run_verif_strongly(makeMeStronglyConnected, "graph_example/strongConnectivity")
+if __name__ == '__main__':
+	run_verif_strongly(makeMeStronglyConnected, oldstrongly.makeMeStronglyConnected, "graph_example/strongConnectivity")

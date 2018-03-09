@@ -1,55 +1,5 @@
 from algopy import graph, graphmat
 
-import os
-
-def __graphlist(dirpath):
-    """builds a list of graphs from a given directory
-    Args: 
-        dirpath (str): path to the graph directory (".gra" format)
-    Returns:
-        Graph list
-    """
-    
-    files = os.listdir(dirpath)
-    L = []
-    for f in files:
-        L.append(dirpath + "/" + f)
-    
-    L = sorted(L)
-    return [graph.loadgra(f) for f in L]
-    
-# pour les adeptes des "list comprehensions"
-
-def __graphlist2(dirpath):
-    return [graph.loadgra(dirpath + "/" + f) for f in os.listdir(dirpath)]
-    
-
-#without verification!
-def run_coloration(f, dirpath):
-    return [f(G)[0] for G in __graphlist(dirpath)]
-
-# with verification
-
-def __testcolors(G, colors):
-    for s in range(G.order):
-        for adj in G.adjlists[s]:
-            if colors[s] == colors[adj]:
-                print(s, adj, colors)
-                return False
-    return True
-
-def run_verif_coloration(f, dirpath):
-	tests = __graphlist(dirpath)
-
-	for G in tests:
-		if G.order == 812:
-			Gr, _, _, _ = makeMeToutPiti(G)
-			graph.savedot(Gr, "gr.dot")
-		count = f(G)
-		a, ccf, _ = tarjan_algorithm(G)
-
-		print(G.order, ':', count, '(', ccf, ')')
-
 def lst(i):
 	return [[] for i in range(i)]
 
@@ -252,4 +202,3 @@ def makeMeStronglyConnected0(G, Gr, pccf, pccf_v):
 def makeMeStronglyConnected(G):
 	return makeMeStronglyConnected0(G, G, None, None)
 
-run_verif_coloration(makeMeStronglyConnected, "graph_example/strongConnectivity")
