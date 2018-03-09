@@ -1,6 +1,11 @@
 from algopy import graph, graphmat
-
 import os
+
+def strongly_connected(G):
+	p = ToutPiti(G)
+	p.run()
+
+	return p.ccfid == 1
 
 def __graphlist(dirpath):
     """builds a list of graphs from a given directory
@@ -16,241 +21,175 @@ def __graphlist(dirpath):
         L.append(dirpath + "/" + f)
     
     L = sorted(L)
-    return [graph.loadgra(f) for f in L]
-    
-# pour les adeptes des "list comprehensions"
+    return [graph.loadgra(f) for f in L]    
 
-def __graphlist2(dirpath):
-    return [graph.loadgra(dirpath + "/" + f) for f in os.listdir(dirpath)]
-    
-
-#without verification!
-def run_coloration(f, dirpath):
-    return [f(G)[0] for G in __graphlist(dirpath)]
-
-# with verification
-
-def __testcolors(G, colors):
-    for s in range(G.order):
-        for adj in G.adjlists[s]:
-            if colors[s] == colors[adj]:
-                print(s, adj, colors)
-                return False
-    return True
-
-def run_verif_coloration(f, dirpath):
+def run_verif_strongly(f, dirpath):
 	tests = __graphlist(dirpath)
 
 	for G in tests:
 		count = f(G)
-		a, ccf, _ = tarjan_algorithm(G)
+		r = strongly_connected(G)
+		s = "[{}] {:3d} => {:3d}".format("OK" if r else "KO", G.order, count)
+		print(s)
 
-		print(G.order, ':', count, '(', ccf, ')')
-		if ccf != 1 and G.order == 20:
-			#print(graph.todot(G))
-			print(a)
-			break
-
-def lst(i):
-	return [[] for i in range(i)]
-
-def diff(j):
-	return 0 if j != 0 else 1
-
-def tarjan_algorithm(G):
-	""" Implémentation de trajan, retournant:
-	int list: noeud -> ccf
-	int: nombre de composantes fortemment connexe
-	int list: ccf -> 1 noeud
-
-	La dernière valeur sert pour l'algorithme rendant un graphe fo-connexe
+class ToutPiti:
+	""" On définit le graphe fréduit de G comme le graphe réduit de G, auquel on a enlevé
+		les noeuds n'étant pas sources ou puits
+	Cette classe implémente le calcul de ce graphe avec une variante de l'algorithme de Tarjan,
+		et un parcours en O(n) ou n est le nombre de composantes fortement connexes de G
 	"""
-	stack = []
-	res, p = [None] * G.order, [0] * G.order
-	res2 = [] # pour avoir un noeud de chaque ccf sans chercher
+	def __init__(self, G):
+		self.G = G
+		self.stack, self.reachable = [], set()
+		self.c2n, self.c2r, self.c2s = [], [], []
+		self.ccf, self.p = [None] * G.order, [0] * G.order
+		self.pref, self.ccfid = 0, 0
 
-	global pref, ccf # les pythonneries, c'est la vie
-	ccf, pref =  0, 0
+	def __rec(self, v):
+		reach = set()
+		self.p[v], msuf = self.pref, self.pref
 
-	def rec(v):
-		global pref, ccf
-		p[v], msuf = pref, pref
-		stack.append(v)
+		self.stack.append(v)
+		self.pref += 1
 
-		pref += 1
+		for w in self.G.adjlists[v]:
+			if not self.p[w]:
+				a, r = self.__rec(w)
+				reach = reach.union(r)
+				msuf = min(msuf, a)
+			elif self.ccf[w] == None:
+				msuf = min(msuf, self.p[w])
+			if self.ccf[w] != None and self.ccf[v] != self.ccf[w]:
+				reach.add(self.ccf[w])
+				self.c2s[self.ccf[w]] = False
 
-		for w in G.adjlists[v]:	
-			if not p[w]:
-				msuf = min(msuf, rec(w))
-			elif res[w] == None:
-				msuf = min(msuf, p[w])
+		if msuf != self.p[v]:
+			return msuf, reach
 
-		if msuf == p[v]:
-			res2.append(v)
+		self.c2n.append(v)
+		self.c2s.append(True)
 
-			while stack:
-				w = stack.pop()
-				res[w] = ccf
+		while self.stack[-1] != v:
+			self.ccf[self.stack.pop()] = self.ccfid
 
-				if w == v:
-					break
+		self.ccf[self.stack.pop()] = self.ccfid
+		self.ccfid += 1
 
-			ccf += 1
+		res = set()
 
-		return msuf
+		for i in reach:
+			if not self.c2r[i]:
+				res.add(i)
+			else:
+				res = res.union(self.c2r[i])
 
-	for i in range(G.order):
-		if not p[i]:
-			rec(i)
+		self.c2r.append(res)
+		return msuf, {self.ccfid - 1}
 
-	return res, ccf, res2
+	def run(self):
+		for i in range(self.G.order):
+			if not self.p[i]:
+				self.__rec(i)
 
-def connex_algorithm(G, GI):
-	""" Récupère les composantes connexes et les demi-degrés internes/externes
-		d'un graphe fortemment connexe, en utilisant un graphe et son graphe
-		inverse (afin d'optimisé)
-	Returns:
-		int list: noeud -> cc
-		int: nombre de cc
-		int list: demi-degrés internes des noeuds
-		int list: demi-degrés externes des noeuds
-	"""
-	cc, res = 0, [None] * G.order
-	di, de = [0] * G.order, [0] * G.order
+		mp = [None] * self.ccfid
+		c2n, j = [], 0
 
-	def rec(v):
-		res[v] = cc
+		self.Gr = graph.Graph(0, True)
+		self.GrI = graph.Graph(0, True)
 
-		for i in G.adjlists[v]:
-			de[v] += 1
-			di[i] += 1
+		src, sin = [], []
 
-			if res[i] == None:
-				rec(i)
+		for i in range(self.ccfid):
+			if not self.c2s[i]:
+				continue
 
-		for i in GI.adjlists[v]:
-			di[v] += 1
-			de[i] += 1
+			src.append(j)
+			mp[i], j = j, j + 1
+			c2n.append(self.c2n[i])
 
-			if res[i] == None:
-				rec(i)
+			self.Gr.addvertex()
+			self.GrI.addvertex()
 
-	for i in range(G.order):
-		if res[i] == None:
-			rec(i)
-			cc += 1
+			for c in self.c2r[i]:
+				if not mp[c]:
+					sin.append(j)
+					mp[c], j = j, j + 1
+					c2n.append(self.c2n[c])
+					self.Gr.addvertex()
+					self.GrI.addvertex()
 
-	return res, cc, di, de
+				self.Gr.addedge(mp[i], mp[c])
+				self.GrI.addedge(mp[c], mp[i])
 
-def makeMeToutPiti(G):
-	""" Returns:
-	Graph: le graphe réduit
-	Graph: le graphe inverse du graphe réduit
-	int list: le vecteur qui à un noeud du graphe d'origine associe sa composante fo-connexe
-	int list: le vecteur qui à une composante fo-connexe associe un noeud qui la contient
-	"""
-	ccf, k, res2 = tarjan_algorithm(G)
-	Gr = graph.Graph(k, directed = True)
-	GrI = graph.Graph(k, directed = True)
+		self.c2n = c2n
+		return src, sin
 
-	for i in range(G.order):
-		k1 = ccf[i]
-		l = Gr.adjlists[k1]
+def add_edge(G, c2n, l, f, i):
+	if f is None:
+		return i
 
-		for j in G.adjlists[i]:
-			k2 = ccf[j]
-			if k1 != k2 and k2 not in l:
-				Gr.addedge(k1, k2)
-				GrI.addedge(k2, k1)
+	G.addedge(c2n[l], c2n[i])
+	return f
 
-	return Gr, GrI, ccf, res2
+def stronglyRec(G, Gr, GrI, c2n, i, p, l, f):
+	p[i] = True
+	adj = [(len(GrI.adjlists[c]), c) for c in Gr.adjlists[i]]
+	adj.sort()
 
-def sinksAndSources(Gr, GrI):
-	""" Permet d'obtenir les puits/sources. Renvoit:
-	int list list: les sources par rapport à leur cc
-	int list list: les puits par rapport à leur cc
-	"""
+	if len(adj) == 0:
+		return add_edge(G, c2n, l, f, i), i, 1
 
-	res, cc, di, de = connex_algorithm(Gr, GrI)
-	sources, sinks = lst(cc), lst(cc)
+	tot = 1
 
-	for i in range(Gr.order):
-		if di[i] == 0:
-			sources[res[i]].append(i)
+	for j in range(len(adj) - 1):
+		c = adj[j][1]
+		if p[c]:
+			continue
 
-		if de[i] == 0:
-			sinks[res[i]].append(i)
+		for d in GrI.adjlists[c]:
+			if not p[d]:
+				f, l, tot1 = stronglyRec(G, Gr, GrI, c2n, d, p, l, f)
+				tot += tot1
+	
+		if not p[c]:
+			p[c] = True
+			return add_edge(G, c2n, l, f, i), c, tot
 
-	return sources, sinks
+	c = adj.pop()[1]
+	p[c] = True
+	return add_edge(G, c2n, l, f, i), c, tot
 
-def makeMeStronglyConnected0(G, Gr, pccf, pccf_v):
-	Gr, GrI, ccf_v, ccf = makeMeToutPiti(Gr)
+def makeMeStronglyConnected(G):
+	piti = ToutPiti(G)
+	src, sin = piti.run()
+
+	Gr, GrI, c2n = piti.Gr, piti.GrI, piti.c2n
 
 	if Gr.order == 1:
 		return 0
 
-	""" ccf[i] contient un noeud de la composante fortement connexe i
-		on fait en sorte que lorsqu'on réduit un graphe réduit, on ai
-		toujours affaire au noeud d'origine
-	"""
-	if pccf:
-		for i in range(len(ccf)):
-			ccf[i] = pccf[ccf[i]]
+	src = [(len(Gr.adjlists[c]), c) for c in src]
+	src.sort()
 
-	""" ccf_v contient le mappage noeud -> composaantes
-		néanmoins, quand on applique Tarjan sur le graphe réduit, on perd le mappage
-		d'origine, c'est pourquoi on le recrée ici
+	p = [False] * Gr.order
+	f, l = None, None
+	tot = 0
 
-		pas très opti, voir si mieux (mais tjrs mieux que re-trajan tout le graphe)
-	"""
-	if pccf_v:
-		for i in range(len(pccf_v)):
-			pccf_v[i] = ccf_v[pccf_v[i]]
-		ccf_v = pccf_v
+	for _, i in src:
+		if not p[i]:
+			f, l, tot1 = stronglyRec(G, Gr, GrI, c2n, i, p, l, f)
+			tot += tot1
 
-	sources, sinks = sinksAndSources(Gr, GrI)
-	cck = len(sources)
+	for i in sin:
+		if not p[i]:
+			G.addedge(c2n[i], c2n[GrI.adjlists[i][0]])
+			tot += 1
 
-	count = [0]
+	G.addedge(c2n[l], c2n[f])
 
-	def addedge(i, j):
-		i = ccf[i] if i != None else diff(ccf[j])
-		j = ccf[j] if j != None else diff(i)
+	piti = ToutPiti(G)
+	piti.run()
 
-		count[0] += 1
+	return tot
 
-		Gr.addedge(ccf_v[i], ccf_v[j])
-		G.addedge(i, j)
-
-	for i in range(cck):
-		nxt = (i + 1) % cck
-		addedge(sinks[i].pop(), sources[nxt].pop())
-
-	a, b = 0, 0
-
-	while a < cck and b < cck:
-		if not sinks[a]:
-			a += 1
-		elif not sources[b]:
-			b += 1
-		else:
-			addedge(sinks[a].pop(), sources[b].pop())
-
-	while a < cck:
-		if not sinks[a]:
-			a += 1
-		else:
-			addedge(sinks[a].pop(), None)
-
-	while b < cck:
-		if not sinks[b]:
-			b += 1
-		else:
-			addedge(None, sources[b].pop())
-
-	return count[0] + makeMeStronglyConnected0(G, Gr, ccf, ccf_v)
-
-def makeMeStronglyConnected(G):
-	return makeMeStronglyConnected0(G, G, None, None)
-
-run_verif_coloration(makeMeStronglyConnected, "graph_example/strongConnectivity")
+run_verif_strongly(makeMeStronglyConnected, "graph_example/strongConnectivity")
