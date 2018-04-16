@@ -19,24 +19,20 @@ def MaximumCardinalityMatching(G, sources, sinks):
 	"""
 	Either E the set of couples (x, y) such that x->y exist in G. In addition, there must be only one couple (x, u) and one couple (u, y), where u is a vertex
 
-	Either F the set of couples (x, x) such that x is a source of G and such that there exist no couple (x, u) in E
+	Either F the set of couples (x, x) such that x is a node of G and such that there exist no couple (x, u) in E
 
 	Either G the union between E and F. The purpose of this algorithm is to maximize Card(E).
 
-	Either H the set of nodes x such that their exist no couple (u, x) in G. 
-
-	The algorithm return G and H.
+	The algorithm return G.
 	This algorithm is a special case of Ford-Fulkerson algorithm.
 
 	Returns:
 		(int, int) list		G
-		(int) list		H
 	"""
 	seen = None
 	match = [None] * G.order
 
 	matchList = []
-	aloneSinks = []
 
 	def RecFunc(node):
 		"""
@@ -56,15 +52,14 @@ def MaximumCardinalityMatching(G, sources, sinks):
 
 		if not RecFunc(i):
 			matchList.append((i, i)) # i match with himself
-			match[i] = -1 # if i is an isolated node
 
 	for i in sinks:
 		if match[i] is None:
-			aloneSinks.append(i)
-		elif match[match[i]] != -1:
+			matchList.append((i, i))
+		else:
 			matchList.append((match[i], i))
 
-	return matchList, aloneSinks
+	return matchList
 
 def MakeMeStronglyConnected(G):
 	"""
@@ -78,7 +73,7 @@ def MakeMeStronglyConnected(G):
 	if Gr.order == 1: # If the graph G is already strongly connected, Card(A') is 0
 		return 0
 
-	matching, aloneSinks = MaximumCardinalityMatching(Gr, sources, sinks)
+	matching = MaximumCardinalityMatching(Gr, sources, sinks)
 
 	"""
 	For each element (x, y) of G
@@ -95,11 +90,4 @@ def MakeMeStronglyConnected(G):
 
 	G.addedge(c2n[last], c2n[first])
 
-	"""
-	For each isolated sinks x, we add an edge x -> y, with y a vertex such that y ~> x exist. y can be any vertex of the reduced graph which is not an isolated source.
-	'first' fulfils these conditions.
-	"""
-	for sink in aloneSinks:
-		G.addedge(c2n[sink], c2n[first])
-
-	return len(matching) + len(aloneSinks)
+	return len(matching)
