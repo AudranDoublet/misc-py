@@ -57,7 +57,7 @@ def MaximumCardinalityMatching(G, sources, sinks):
 	for i in sinks:
 		if match[i] is None:
 			matchList.append((i, i))
-		elif seen[i] >= 0:
+		elif seen[i] != -1:
 			matchList.append((match[i], i))
 
 	return matchList
