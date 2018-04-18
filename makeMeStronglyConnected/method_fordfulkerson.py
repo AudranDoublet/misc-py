@@ -52,11 +52,12 @@ def MaximumCardinalityMatching(G, sources, sinks):
 
 		if not RecFunc(i):
 			matchList.append((i, i)) # i match with himself
+			seen[i] = -1
 
 	for i in sinks:
 		if match[i] is None:
 			matchList.append((i, i))
-		else:
+		elif seen[i] >= 0:
 			matchList.append((match[i], i))
 
 	return matchList
